@@ -237,12 +237,18 @@ http://127.0.0.1:5000/
 ## 📸 Screenshots
 
 ### 1. Input Form
+<img width="608" height="845" alt="Screenshot 2026-04-04 171411" src="https://github.com/user-attachments/assets/c102795b-62d0-48b7-9fb7-fde67b9d7e4b" />
+
 Modern, clean interface for entering health metrics with:
 - Organized two-column grid layout
 - Input validation and placeholders
 - Unit indicators for each field
 
 ### 2. Results Dashboard
+<img width="974" height="342" alt="Screenshot 2026-04-04 171511" src="https://github.com/user-attachments/assets/4858aa5d-e638-4c2a-8513-ff2af9d55779" />
+<img width="994" height="613" alt="Screenshot 2026-04-04 171524" src="https://github.com/user-attachments/assets/49d37907-df76-4d36-9316-13d5690d067c" />
+<img width="982" height="591" alt="Screenshot 2026-04-04 171537" src="https://github.com/user-attachments/assets/31024d06-ed06-40b9-9466-9b5804b9266f" />
+ 
 Comprehensive analysis page featuring:
 - Risk probability with visual indicator
 - Interactive bar chart of all metrics
