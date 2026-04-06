@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Predictor - Result</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * { 
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box; 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #670d10 0%, #092756 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .result-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .danger { 
+            color: #ff4b2b;
+            text-shadow: 0 0 20px rgba(255, 75, 43, 0.5);
+        }
+        
+        .safe { 
+            color: #2ecc71;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .probability-box {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 50px;
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .probability-value {
+            color: #f1c40f;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-unit {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 3px;
+        }
+
+        .risk-factors {
+            margin-top: 20px;
+        }
+
+        .risk-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .risk-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .risk-icon-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .risk-high { background: #ff4b2b; box-shadow: 0 0 10px #ff4b2b; }
+        .risk-medium { background: #f39c12; box-shadow: 0 0 10px #f39c12; }
+        .risk-normal { background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+
+        .risk-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .risk-value-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .result-title {
+                font-size: 24px;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .footer-heart {
+            color: #f56565;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Result Header -->
+        <div class="result-header">
+            {% if prediction == 1 %}
+                <div class="result-icon">⚠️</div>
+                <h1 class="result-title">
+                    <span class='danger'>Diabetes Risk Detected</span>
+                </h1>
+                <p style="font-size: 16px; opacity: 0.9;">Based on your health metrics, there is an indication of diabetes risk</p>
+            {% else %}
+                <div class="result-icon">✅</div>
+                <h1 class="result-title">
+                    <span class='safe'>Low Diabetes Risk</span>
+                </h1>
+                <p style="font-size: 16px; opacity: 0.9;">Your health metrics show a low probability of diabetes</p>
+            {% endif %}
+            
+            <div class="probability-box">
+                Risk Probability: <span class="probability-value">{{ probability }}%</span>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Your Health Metrics Card -->
+            <div class="card">
+                <h2>📊 Your Health Metrics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Glucose</div>
+                        <div class="stat-value">{{ glucose }}<span class="stat-unit">mg/dL</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">BMI</div>
+                        <div class="stat-value">{{ bmi }}<span class="stat-unit">kg/m²</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Blood Pressure</div>
+                        <div class="stat-value">{{ bp }}<span class="stat-unit">mmHg</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Age</div>
+                        <div class="stat-value">{{ age }}<span class="stat-unit">years</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Insulin</div>
+                        <div class="stat-value">{{ insulin }}<span class="stat-unit">IU/mL</span></div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Pregnancies</div>
+                        <div class="stat-value">{{ pregnancies }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Factors Analysis Card -->
+            <div class="card">
+                <h2>🔍 Risk Factors Analysis</h2>
+                <div class="risk-factors" id="riskFactors">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Chart Card (Full Width) -->
+            <div class="card full-width">
+                <h2>📈 Health Metrics Visualization</h2>
+                <div class="chart-container">
+                    <canvas id="metricsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">🔄 Check Again</a>
+            <button class="btn btn-secondary" onclick="window.print()">📄 Download Report</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Made with <span class="footer-heart">❤️</span>
+        </div>
+    </div>
+
+    <script>
+        // Data from Flask
+        const healthData = {
+            glucose: {{ glucose }},
+            bmi: {{ bmi }},
+            bp: {{ bp }},
+            age: {{ age }},
+            insulin: {{ insulin }},
+            pregnancies: {{ pregnancies }},
+            dpf: {{ dpf }},
+            skinThickness: {{ skin_thickness }}
+        };
+
+        // Risk thresholds
+        const thresholds = {
+            glucose: { high: 140, medium: 100, name: 'Glucose Level' },
+            bmi: { high: 30, medium: 25, name: 'Body Mass Index' },
+            age: { high: 45, medium: 35, name: 'Age Factor' },
+            bp: { high: 90, medium: 80, name: 'Blood Pressure' },
+            insulin: { high: 200, medium: 100, name: 'Insulin Level' },
+            pregnancies: { high: 6, medium: 3, name: 'Pregnancy History' },
+            dpf: { high: 0.8, medium: 0.5, name: 'Genetic Factor' }
+        };
+
+        // Risk messages in Hindi + English
+        const riskMessages = {
+            glucose: {
+                high: 'उच्च ग्लूकोज स्तर - High glucose significantly increases diabetes risk',
+                medium: 'ग्लूकोज थोड़ा अधिक है - Glucose levels are slightly elevated',
+                normal: 'ग्लूकोज सामान्य है - Glucose levels are in normal range'
+            },
+            bmi: {
+                high: 'अधिक वजन - High BMI is a major diabetes risk factor',
+                medium: 'वजन सामान्य से अधिक - BMI is above healthy range',
+                normal: 'वजन सामान्य है - BMI is in healthy range'
+            },
+            age: {
+                high: 'उम्र बढ़ने से जोखिम - Age increases diabetes risk',
+                medium: 'उम्र मध्यम जोखिम - Age is a moderate risk factor',
+                normal: 'उम्र कम जोखिम - Age-related risk is low'
+            },
+            bp: {
+                high: 'उच्च रक्तचाप - High blood pressure increases risk',
+                medium: 'रक्तचाप थोड़ा अधिक - Blood pressure slightly elevated',
+                normal: 'रक्तचाप सामान्य - Blood pressure is normal'
+            },
+            insulin: {
+                high: 'इंसुलिन प्रतिरोध संभव - Insulin resistance may be present',
+                medium: 'इंसुलिन थोड़ा अधिक - Insulin levels moderately elevated',
+                normal: 'इंसुलिन सामान्य - Insulin levels are normal'
+            },
+            pregnancies: {
+                high: 'अधिक गर्भधारण - Multiple pregnancies increase risk',
+                medium: 'गर्भधारण मध्यम जोखिम - Moderate pregnancy-related risk',
+                normal: 'गर्भधारण कम जोखिम - Low pregnancy-related risk'
+            },
+            dpf: {
+                high: 'पारिवारिक इतिहास मजबूत - Strong family history of diabetes',
+                medium: 'आनुवंशिक प्रवृत्ति मध्यम - Moderate genetic predisposition',
+                normal: 'आनुवंशिक जोखिम कम - Low genetic risk'
+            }
+        };
+
+        // Calculate risk level
+        function getRiskLevel(value, threshold) {
+            if (value >= threshold.high) return 'high';
+            if (value >= threshold.medium) return 'medium';
+            return 'normal';
+        }
+
+        // Generate risk factors HTML
+        function generateRiskFactors() {
+            const riskFactorsDiv = document.getElementById('riskFactors');
+            let html = '';
+
+            for (let key in healthData) {
+                if (thresholds[key]) {
+                    const level = getRiskLevel(healthData[key], thresholds[key]);
+                    const message = riskMessages[key][level];
+                    
+                    html += `
+                        <div class="risk-item">
+                            <div class="risk-icon-dot risk-${level}"></div>
+                            <div class="risk-text">${message}</div>
+                            <div class="risk-value-badge">${healthData[key]}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            riskFactorsDiv.innerHTML = html;
+        }
+
+        // Create Chart
+        function createChart() {
+            const ctx = document.getElementById('metricsChart').getContext('2d');
+            
+            const labels = [];
+            const data = [];
+            const colors = [];
+
+            for (let key in healthData) {
+                if (thresholds[key]) {
+                    labels.push(thresholds[key].name);
+                    data.push(healthData[key]);
+                    
+                    const level = getRiskLevel(healthData[key], thresholds[key]);
+                    if (level === 'high') {
+                        colors.push('rgba(255, 75, 43, 0.8)');
+                    } else if (level === 'medium') {
+                        colors.push('rgba(243, 156, 18, 0.8)');
+                    } else {
+                        colors.push('rgba(46, 204, 113, 0.8)');
+                    }
+                }
+            }
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Your Values',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('0.8', '1')),
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            borderRadius: 8,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            generateRiskFactors();
+            createChart();
+        };
+    </script>
+</body>
+</html>

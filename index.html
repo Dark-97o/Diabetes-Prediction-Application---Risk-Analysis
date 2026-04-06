@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diabetes Risk Predictor</title>
+  <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' rel='stylesheet'>
+  
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.header h1 {
+  color: #1a202c;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: #718096;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  background: #f7fafc;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-input::placeholder {
+  color: #a0aec0;
+}
+
+.input-unit {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.prediction-result {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.footer-heart {
+  color: #f56565;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 30px 20px;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .header h1 {
+    font-size: 24px;
+  }
+}
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏥 Diabetes Risk Predictor</h1>
+      <p>Enter your health metrics to assess diabetes risk</p>
+    </div>
+
+    <form action="{{ url_for('predict') }}" method="post">
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="pregnancies">Pregnancies</label>
+          <input class="form-input" type="number" id="pregnancies" name="pregnancies" placeholder="0" step="1" min="0" required>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age</label>
+          <div class="input-wrapper">
+            <input class="form-input" type="number" id="age" name="age" placeholder="34" step="1" min="1" max="120" required>
+            <span class="input-unit">years</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="glucose">Glucose Level</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="number" id="glucose" name="glucose" placeholder="80" step="0.1" min="0" required>
+          <span class="input-unit">mg/dL</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bloodpressure">Blood Pressure</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="number" id="bloodpressure" name="bloodpressure" placeholder="80" step="1" min="0" required>
+          <span class="input-unit">mmHg</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="skinthickness">Skin Thickness</label>
+          <div class="input-wrapper">
+            <input class="form-input" type="number" id="skinthickness" name="skinthickness" placeholder="20" step="1" min="0" required>
+            <span class="input-unit">mm</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="insulin">Insulin Level</label>
+          <div class="input-wrapper">
+            <input class="form-input" type="number" id="insulin" name="insulin" placeholder="80" step="0.1" min="0" required>
+            <span class="input-unit">IU/mL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bmi">Body Mass Index (BMI)</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="number" id="bmi" name="bmi" placeholder="23.1" step="0.1" min="0" required>
+          <span class="input-unit">kg/m²</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="dpf">Diabetes Pedigree Function</label>
+        <input class="form-input" type="number" id="dpf" name="dpf" placeholder="0.52" step="0.01" min="0" max="2.5" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Analyze Risk</button>
+    </form>
+
+    {% if prediction_text %}
+    <div class="prediction-result">
+      {{ prediction_text }}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+      Made with <span class="footer-heart">❤️</span>
+    </div>
+  </div>
+</body>
+</html>
