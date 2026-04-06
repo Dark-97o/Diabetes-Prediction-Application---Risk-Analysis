@@ -22,8 +22,8 @@ df_copy['BMI'].fillna(df_copy['BMI'].median(), inplace=True)
 
 # Model Building
 from sklearn.model_selection import train_test_split
-X = df.drop(columns='Outcome')
-y = df['Outcome']
+X = df_copy.drop(columns='Outcome')
+y = df_copy['Outcome']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
 
 # Creating Random Forest Model
